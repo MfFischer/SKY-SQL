@@ -8,6 +8,7 @@ JOIN airlines ON flights.airline = airlines.id
 WHERE flights.ID = :id
 """
 
+
 class FlightData:
     """
     The FlightData class is a Data Access Layer (DAL) object that provides an
@@ -15,6 +16,7 @@ class FlightData:
     the class forms connection to the sqlite database file, which remains active
     until the object is destroyed.
     """
+
     def __init__(self, db_uri):
         """
         Initialize a new engine using the given database URI
