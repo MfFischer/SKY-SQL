@@ -1,8 +1,12 @@
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
 
-QUERY_FLIGHT_BY_ID = ("SELECT flights.*, airlines.airline, flights.ID as FLIGHT_ID, flights.DEPARTURE_DELAY as DELAY "
-                      "FROM flights JOIN airlines ON flights.airline = airlines.id WHERE flights.ID = :id")
-
+QUERY_FLIGHT_BY_ID = """
+SELECT flights.*, airlines.airline, flights.ID as FLIGHT_ID, flights.DEPARTURE_DELAY as DELAY 
+FROM flights 
+JOIN airlines ON flights.airline = airlines.id 
+WHERE flights.ID = :id
+"""
 
 class FlightData:
     """
@@ -11,7 +15,6 @@ class FlightData:
     the class forms connection to the sqlite database file, which remains active
     until the object is destroyed.
     """
-
     def __init__(self, db_uri):
         """
         Initialize a new engine using the given database URI
@@ -24,7 +27,13 @@ class FlightData:
         and returns a list of records (dictionary-like objects).
         If an exception was raised, print the error, and return an empty list.
         """
-        pass  # Your code here
+        try:
+            with self._engine.connect() as connection:
+                result = connection.execute(text(query), params)
+                return [dict(row._mapping) for row in result]
+        except SQLAlchemyError as e:
+            print(f"Error executing query: {e}")
+            return []
 
     def get_flight_by_id(self, flight_id):
         """
@@ -36,6 +45,6 @@ class FlightData:
 
     def __del__(self):
         """
-        Closes the connection to the databse when the object is about to be destroyed
+        Closes the connection to the database when the object is about to be destroyed
         """
         self._engine.dispose()

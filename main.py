@@ -2,7 +2,7 @@ import data
 from datetime import datetime
 import sqlalchemy
 
-SQLITE_URI = 'sqlite:///data/flights.sqlite3'
+SQLITE_URI = 'sqlite:///flights.sqlite3'
 IATA_LENGTH = 3
 
 
@@ -26,7 +26,7 @@ def delayed_flights_by_airport(data_manager):
     valid = False
     while not valid:
         airport_input = input("Enter origin airport IATA code: ")
-        # Valide input
+        # Validate input
         if airport_input.isalpha() and len(airport_input) == IATA_LENGTH:
             valid = True
     results = data_manager.get_delayed_flights_by_airport(airport_input)
@@ -72,31 +72,28 @@ def flights_by_date(data_manager):
 
 def print_results(results):
     """
-    Get a list of flight results (List of dictionary-like objects from SQLAachemy).
+    Get a list of flight results (List of dictionary-like objects from SQLAlchemy).
     Even if there is one result, it should be provided in a list.
     Each object *has* to contain the columns:
     FLIGHT_ID, ORIGIN_AIRPORT, DESTINATION_AIRPORT, AIRLINE, and DELAY.
     """
     print(f"Got {len(results)} results.")
     for result in results:
-        # turn result into dictionary
-        result = result._mapping
-
         # Check that all required columns are in place
         try:
-            delay = int(result['DELAY']) if result['DELAY'] else 0  # If delay columns is NULL, set it to 0
+            delay = int(result['DELAY']) if result['DELAY'] else 0  # If delay column is NULL, set it to 0
             origin = result['ORIGIN_AIRPORT']
             dest = result['DESTINATION_AIRPORT']
             airline = result['AIRLINE']
-        except (ValueError, sqlalchemy.exc.SQLAlchemyError) as e:
+        except (ValueError, KeyError) as e:
             print("Error showing results: ", e)
             return
 
         # Different prints for delayed and non-delayed flights
         if delay and delay > 0:
-            print(f"{result['ID']}. {origin} -> {dest} by {airline}, Delay: {delay} Minutes")
+            print(f"{result['FLIGHT_ID']}. {origin} -> {dest} by {airline}, Delay: {delay} Minutes")
         else:
-            print(f"{result['ID']}. {origin} -> {dest} by {airline}")
+            print(f"{result['FLIGHT_ID']}. {origin} -> {dest} by {airline}")
 
 
 def show_menu_and_get_input():
@@ -122,11 +119,11 @@ def show_menu_and_get_input():
 """
 Function Dispatch Dictionary
 """
-FUNCTIONS = { 1: (flight_by_id, "Show flight by ID"),
-              2: (flights_by_date, "Show flights by date"),
-              3: (delayed_flights_by_airline, "Delayed flights by airline"),
-              4: (delayed_flights_by_airport, "Delayed flights by origin airport"),
-              5: (quit, "Exit")
+FUNCTIONS = {1: (flight_by_id, "Show flight by ID"),
+             2: (flights_by_date, "Show flights by date"),
+             3: (delayed_flights_by_airline, "Delayed flights by airline"),
+             4: (delayed_flights_by_airport, "Delayed flights by origin airport"),
+             5: (quit, "Exit")
              }
 
 
